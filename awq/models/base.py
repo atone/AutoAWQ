@@ -91,6 +91,7 @@ TRANSFORMERS_AUTO_MAPPING_DICT = {
     "qwen2_vl": "AutoModelForVision2Seq",
     "qwen2_5_vl": "AutoModelForVision2Seq",
     "qwen2_5_omni": "AutoModelForTextToWaveform",
+    "TeleFLM": "AutoModelForCausalLM",
 }
 
 
