@@ -17,6 +17,8 @@ def main():
 
     # Model config arguments
     parser.add_argument("--device_map", type=str, default=None, help="Device map for loading the pretrained model")
+    parser.add_argument("--no-safetensors", action="store_false", dest="safetensors", help="Disable safetensors for loading the pretrained model")
+    parser.add_argument("--torch_dtype", type=str, default="auto", help="Torch dtype for loading the pretrained model")
 
     # Quantize parameters
     parser.add_argument("--max_calib_samples", type=int, default=128, help="Number of calibration samples.")
@@ -34,7 +36,9 @@ def main():
     print(f"Loading model from: {args.hf_model_path}")
     model = AutoAWQForCausalLM.from_pretrained(
         args.hf_model_path,
+        safetensors=args.safetensors,
         device_map=args.device_map,
+        torch_dtype=args.torch_dtype,
     )
     tokenizer = AutoTokenizer.from_pretrained(args.hf_model_path, trust_remote_code=True)
 
