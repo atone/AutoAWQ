@@ -9,7 +9,7 @@ def main():
     parser.add_argument("--local_save_path", type=str, required=True, help="Path to save the quantized model")
 
     # Quantization config arguments
-    parser.add_argument("--zero_point", action="store_true", help="Enable zero point for quantization")
+    parser.add_argument("--zero_point", action="store_true", default=True, help="Enable zero point for quantization")
     parser.add_argument("--no-zero_point", action="store_false", dest="zero_point", help="Disable zero point for quantization")
     parser.add_argument("--q_group_size", type=int, default=128, help="Quantization group size")
     parser.add_argument("--w_bit", type=int, default=4, help="Weight bit width")
