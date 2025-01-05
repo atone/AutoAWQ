@@ -41,7 +41,15 @@ def pad_model(model_path, output_path):
     model.config.intermediate_size = 22528
     model.config.save_pretrained(output_path)
     # save the tokenizer
-    tokenizer.chat_template = "{%- for message in messages %}{%- if message['role'] == 'user' %}{{- '<_user>' + message['content']|trim + '<_bot>' }}{%- elif message['role'] == 'system' %}{{- '<_system>' + message['content']|trim }}{%- elif message['role'] == 'assistant' %}{{- message['content'] }}{%- endif %}{%- endfor %}"
+    tokenizer.chat_template =   "{%- for message in messages %}" \
+                                    "{%- if message['role'] == 'user' %}" \
+                                        "{{- '<_user>' + message['content']|trim + '<_bot>' }}" \
+                                    "{%- elif message['role'] == 'system' %}" \
+                                        "{{- '<_system>' + message['content']|trim }}" \
+                                    "{%- elif message['role'] == 'assistant' %}" \
+                                        "{{- message['content'] }}" \
+                                    "{%- endif %}" \
+                                "{%- endfor %}"
     tokenizer.save_pretrained(output_path)
 
 
