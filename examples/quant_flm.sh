@@ -23,7 +23,7 @@ KS3_PATH="ks3://baai-cofe/ynt/models/$MODEL_NAME"
 echo "Uploading model from JD to ks3..."
 ssh jd_infer ks3util cp -ru "$JD_PATH" "$KS3_PATH"
 echo "Downloading model from ks3 to local..."
-ks3util cp -ru "$KS3_PATH" "$MODEL_PATH"
+ks3util cp -ru "$KS3_PATH" "$MODEL_PREFIX"
 
 # 2. padd model
 PADDED_MODEL_PATH="$LOCAL_PREFIX/$MODEL_NAME-padded"
