@@ -13,7 +13,7 @@ MODEL_NAME="$2"
 # 0. set env
 eval "$(conda shell.bash hook)"
 conda activate autoawq
-CUDA_VISIBLE_DEVICES=2,3,4,5
+export CUDA_VISIBLE_DEVICES=2,3,4,5
 
 LOCAL_PREFIX="/data/ynt/models"
 
