@@ -168,3 +168,5 @@ cython_debug/
 **/*.pyc
 *.json
 __pycache__
+.ks3util_checkpoint
+ks3util_output
