@@ -39,6 +39,7 @@ def pad_model(model_path, output_path):
     shutil.copy(model_path / 'modeling_teleflm.py', output_path / 'modeling_teleflm.py')
     # change the intermediate size, remove unneeded attributes, and save the config
     model.config.intermediate_size = 22528
+    # 删除此属性，否则量化时可能报cuda out of memory错误
     del model.config._attn_implementation_autoset
     del model.config._name_or_path
     model.config.save_pretrained(output_path)
