@@ -37,8 +37,10 @@ def pad_model(model_path, output_path):
     print(f'Saving model to {output_path}')
     torch.save(sd, output_path / 'pytorch_model.bin')
     shutil.copy(model_path / 'modeling_teleflm.py', output_path / 'modeling_teleflm.py')
-    # change the intermediate size and save the config
+    # change the intermediate size, remove unneeded attributes, and save the config
     model.config.intermediate_size = 22528
+    del model.config._attn_implementation_autoset
+    del model.config._name_or_path
     model.config.save_pretrained(output_path)
     # save the tokenizer
     tokenizer.chat_template =   "{%- for message in messages %}" \
