@@ -29,7 +29,7 @@ from awq.utils.module import (
     exclude_layers_to_not_quantize,
     try_import,
 )
-from awq.utils.utils import get_best_device, ipex_available
+from awq.utils.utils import get_best_device, ipex_available, triton_available
 from transformers import (
     AutoConfig,
     PreTrainedModel,
@@ -82,6 +82,7 @@ TRANSFORMERS_AUTO_MAPPING_DICT = {
     "phi3_v": "AutoModelForCausalLM",
     "cohere": "AutoModelForCausalLM",
     "deepseek_v2": "AutoModelForCausalLM",
+    "deepseek_v3": "AutoModelForCausalLM",
     "minicpm": "AutoModelForCausalLM",
     "minicpm3":"AutoModelForCausalLM",
     "internlm2": "AutoModelForCausalLM",
@@ -499,7 +500,8 @@ class BaseAWQForCausalLM(nn.Module):
             )
 
         best_device = get_best_device()
-        use_ipex = use_ipex or best_device in ["cpu", "xpu:0"]
+        if best_device == "cpu" or (best_device == "xpu:0" and not triton_available):
+            use_ipex = True
         if use_ipex and not ipex_available:
             raise ImportError(
                 "Please install intel_extension_for_pytorch with "

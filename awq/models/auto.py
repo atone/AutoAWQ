@@ -1,4 +1,5 @@
 import os
+import torch
 import logging
 from transformers import AutoConfig
 from awq.models import *
@@ -34,6 +35,7 @@ AWQ_CAUSAL_LM_MODEL_MAP = {
     "phi3_v": Phi3VAWQForCausalLM,
     "cohere": CohereAWQForCausalLM,
     "deepseek_v2": DeepseekV2AWQForCausalLM,
+    "deepseek_v3": DeepseekV3AWQForCausalLM,
     "minicpm": MiniCPMAWQForCausalLM,
     "internlm2": InternLM2AWQForCausalLM,
     "minicpm3": MiniCPM3AWQForCausalLM,
@@ -63,6 +65,7 @@ class AutoAWQForCausalLM:
     def from_pretrained(
         self,
         model_path,
+        torch_dtype="auto",
         trust_remote_code=True,
         safetensors=True,
         device_map=None,
@@ -78,6 +81,7 @@ class AutoAWQForCausalLM:
         return AWQ_CAUSAL_LM_MODEL_MAP[model_type].from_pretrained(
             model_path,
             model_type,
+            torch_dtype=torch_dtype,
             trust_remote_code=trust_remote_code,
             safetensors=safetensors,
             device_map=device_map,
