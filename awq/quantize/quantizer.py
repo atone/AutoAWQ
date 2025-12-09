@@ -7,7 +7,7 @@ import torch.nn as nn
 from tqdm import tqdm
 from typing import Dict, List, Optional
 from collections import defaultdict
-from awq.utils.calib_data import get_calib_dataset
+from awq.utils.calib_data import get_calib_dataset, get_calib_audio_dataset
 from awq.quantize.scale import apply_scale, apply_clip
 from awq.utils.utils import clear_memory, get_best_device
 from awq.modules.linear import (
@@ -171,7 +171,7 @@ class AwqQuantizer:
                 # position embeddings found in tuple
                 if isinstance(v, tuple):
                     self.module_kwargs[k] = tuple(
-                        item.to(common_device) if isinstance(item, (torch.Tensor, nn.Module)) 
+                        item.to(common_device) if isinstance(item, (torch.Tensor, nn.Module))
                         else item for item in v
                     )
 
@@ -339,7 +339,7 @@ class AwqQuantizer:
 
         # Use float32 for sum calculation
         x_sum = torch.zeros(num_channels, dtype=torch.float32, device=inp.device)
-        
+
         for i in range(0, num_elements, chunk_size):
             end = min(i + chunk_size, num_elements)
             chunk_sum = inp_flat[i:end].to(torch.float32).sum(dim=0)
@@ -512,7 +512,7 @@ class AwqQuantizer:
         # Compute input feature step size (minimum 1)
         step_size = max(1, input_feat.shape[1] // n_sample_token)
         input_feat = input_feat[:, ::step_size]
-        
+
         w = w.reshape(org_w_shape[0], 1, -1, group_size)
 
         oc_batch_size = 256 if org_w_shape[0] % 256 == 0 else 64  # prevent OOM
@@ -555,15 +555,22 @@ class AwqQuantizer:
 
     def init_quant(self, n_samples=128, max_seq_len=512):
         modules = self.awq_model.get_model_layers(self.model)
-        samples = get_calib_dataset(
-            data=self.calib_data,
-            tokenizer=self.tokenizer,
-            n_samples=n_samples,
-            max_seq_len=max_seq_len,
-            split=self.split,
-            text_column=self.text_column,
-        )
-        samples = torch.cat(samples, dim=0)
+
+        if self.awq_model.model_type == "FLMAudio":
+             samples = get_calib_audio_dataset(
+                data=self.calib_data,
+                n_samples=n_samples,
+                max_seq_len=max_seq_len,
+            )
+        else:
+            samples = get_calib_dataset(
+                data=self.calib_data,
+                tokenizer=self.tokenizer,
+                n_samples=n_samples,
+                max_seq_len=max_seq_len,
+                split=self.split,
+                text_column=self.text_column,
+            )
 
         inps = []
         layer_kwargs = {}
@@ -596,14 +603,20 @@ class AwqQuantizer:
         # patch layer 0 to catch input and kwargs
         modules[0] = Catcher(modules[0])
         try:
-            self.model(samples.to(next(self.model.parameters()).device))
+            if isinstance(samples, torch.Tensor):
+                self.model(samples.to(next(self.model.parameters()).device))
+            else:
+                self.model(**{k: v.to(next(self.model.parameters()).device) for k, v in samples.items()})
         except ValueError:  # work with early exit
             pass
         modules[0] = modules[0].module  # restore
 
         # Update the layer kwargs with `prepare_inputs_for_generation` method
         # that takes care of everything to avoid unexpected errors.
-        layer_kwargs = self.model.prepare_inputs_for_generation(samples, **layer_kwargs)
+        if isinstance(samples, torch.Tensor):
+            layer_kwargs = self.model.prepare_inputs_for_generation(samples, **layer_kwargs)
+        else:
+            layer_kwargs = self.model.prepare_inputs_for_generation(**samples, **layer_kwargs)
         # Pop the input_ids as they are not needed at all.
         layer_kwargs.pop("input_ids")
 
@@ -646,7 +659,7 @@ class AwqQuantizer:
                 **named_linears,
                 "mlp": layer.mlp,
             }
-        
+
         if self.awq_model.model_type == "qwen3_moe":
             named_linears = {
                 **named_linears,
