@@ -34,3 +34,4 @@ from .qwen2vl import Qwen2VLAWQForCausalLM
 from .qwen2_5_vl import Qwen2_5_VLAWQForCausalLM
 from .qwen2_5_omni import Qwen2_5_OmniAWQForConditionalGeneration
 from .teleflm import TeleFLMAWQForCausalLM
+from .flmaudio import FLMAudioAWQForCausalLM

@@ -45,6 +45,7 @@ AWQ_CAUSAL_LM_MODEL_MAP = {
     "qwen2_5_vl": Qwen2_5_VLAWQForCausalLM,
     "qwen2_5_omni": Qwen2_5_OmniAWQForConditionalGeneration,
     "TeleFLM": TeleFLMAWQForCausalLM,
+    "FLMAudio": FLMAudioAWQForCausalLM,
 }
 
 
